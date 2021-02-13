@@ -39,7 +39,8 @@ export default {
 
     created() {
         if (!navigator.getDisplayMedia && !navigator.mediaDevices.getDisplayMedia) {
-            const msg = "Browser tidak mendukung getDisplayMeida API"
+            const msg = "Browser tidak mendukung getDisplayMedia API"
+            console.log(msg);
             throw new Error(msg)
         }
     },
