@@ -8,8 +8,8 @@
             <div class="block md:hidden text-center leading-loose mt-10 text-2xl px-5 underline">Tidak mendukung di browser mobile</div>
             
             <div class="text-center mt-10" :class="stop ? 'grid grid-cols-2 gap-2 mx-96' : ''">
-                <button v-if="stop" @click="startRecording" class="start transition duration-300 ease-in-out font-semibold border-2 border-blue-500 px-3 py-2 rounded hover:bg-blue-500 hover:text-white">⏺ Start Recording</button>
-                <button v-if="start" @click="stopRecording" class="stop transition duration-300 ease-in-out font-semibold border-2 border-red-500 px-3 py-2 rounded hover:bg-red-500 hover:text-white">⏹ Stop Recording</button>
+                <button v-if="stop" @click="startRecording()" class="start transition duration-300 ease-in-out font-semibold border-2 border-blue-500 px-3 py-2 rounded hover:bg-blue-500 hover:text-white">⏺ Start Recording</button>
+                <button v-if="start" @click="stopRecording()" class="stop transition duration-300 ease-in-out font-semibold border-2 border-red-500 px-3 py-2 rounded hover:bg-red-500 hover:text-white">⏹ Stop Recording</button>
                 <button v-if="stop" @click="() => { videoSrc = null }" class="stop transition duration-300 ease-in-out font-semibold border-2 border-red-500 px-3 py-2 rounded hover:bg-red-500 hover:text-white">🔴 Reset</button>
             </div>
             <div v-if="videoSrc" class="transition duration-300 text-center py-5">
@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import { onMounted, ref } from 'vue'
 import Video from './components/Video.vue'
 export default {
     name: 'App',
@@ -37,51 +38,124 @@ export default {
         Video
     },
 
-    created() {
-        if (!navigator.getDisplayMedia && !navigator.mediaDevices.getDisplayMedia) {
-            const msg = "Browser tidak mendukung getDisplayMedia API"
-            console.log(msg);
-            throw new Error(msg)
-        }
-    },
+    setup() {
+        const start = ref(false)
+        const stop = ref(true)
+        const stream = ref(null)
+        const recorder = ref(null)
+        const videoSrc = ref(null)
 
-    data() {
-        return {
-            start: false,
-            stop: true,
-            stream: null,
-            recorder: null,
-            videoSrc: null
-        }
-    },
+        // onMounted(() => {
+        //     // if (!navigator.getDisplayMedia && !navigator.mediaDevices.getDisplayMedia) {
+        //     //     const msg = "Browser tidak mendukung getDisplayMedia API"
+        //     //     console.log(msg);
+        //     //     throw new Error(msg)
+        //     // }
+        //     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        //         console.log('getUserMedia supported.');
+        //         navigator.mediaDevices.getUserMedia (
+        //             // constraints - only audio needed for this app
+        //             {
+        //                 audio: true
+        //             })
 
-    methods: {
-        async startRecording() {
-            this.start = true
-            this.stop = false
-            console.log('starting recording');
-            this.stream = await navigator.mediaDevices.getDisplayMedia({
+        //             // Success callback
+        //             .then(function(stream) {
+        //                 // console.log(stream);
+        //             })
+
+        //             // Error callback
+        //             .catch(function(err) {
+        //                 console.log('The following getUserMedia error occurred: ' + err);
+        //             }
+        //         );
+        //     } else {
+        //         console.log('getUserMedia not supported on your browser!');
+        //     }
+        // })
+
+        const startRecording = async () => {
+            start.value = true
+            stop.value = false
+            // console.log('starting recording');
+            stream.value = await navigator.mediaDevices.getDisplayMedia({
                 video: { mediaSource: 'screen'}
             })
-            this.recorder = new MediaRecorder(this.stream)
+            recorder.value = new MediaRecorder(stream)
+            console.log(recorder);
 
             const chunks = []
-            this.recorder.ondataavailable = (event) => chunks.push(event.data)
-            this.recorder.onstop = e => {
+            recorder.ondataavailable = (event) => chunks.push(event.data)
+            recorder.onstop = e => {
                 const completeBlob = new Blob(chunks, { type: chunks[0].type });
-                this.videoSrc = URL.createObjectURL(completeBlob);
+                // console.log(completeBlob);
+                videoSrc.value = URL.createObjectURL(completeBlob);
             };
-            this.recorder.start();
-        },
-        stopRecording() {
-            this.start = false
-            this.stop = true
+            recorder.start();
+        }
 
-            this.recorder.stop()
-            this.stream.getVideTracks()[0].stop()
+        const stopRecording = () => {
+            start.value = false
+            stop.value = true
+
+            recorder.stop()
+            stream.getVideTracks()[0].stop()
+            console.log(stream);
             console.log('stop recording');
             
         }
-    }
+
+        return {
+            start, stop, stream, recorder, videoSrc,
+            startRecording, stopRecording
+        }
+    },
+
+    // created() {
+    //     if (!navigator.getDisplayMedia && !navigator.mediaDevices.getDisplayMedia) {
+    //         const msg = "Browser tidak mendukung getDisplayMedia API"
+    //         console.log(msg);
+    //         throw new Error(msg)
+    //     }
+    // },
+
+    // data() {
+    //     return {
+    //         start: false,
+    //         stop: true,
+    //         stream: null,
+    //         recorder: null,
+    //         videoSrc: null
+    //     }
+    // },
+
+    // methods: {
+    //     async startRecording() {
+    //         this.start = true
+    //         this.stop = false
+    //         console.log('starting recording');
+    //         this.stream = await navigator.mediaDevices.getDisplayMedia({
+    //             video: { mediaSource: 'screen'}
+    //         })
+    //         this.recorder = new MediaRecorder(this.stream)
+
+    //         const chunks = []
+    //         this.recorder.ondataavailable = (event) => chunks.push(event.data)
+    //         this.recorder.onstop = e => {
+    //             const completeBlob = new Blob(chunks, { type: chunks[0].type });
+    //             this.videoSrc = URL.createObjectURL(completeBlob);
+    //         };
+    //         this.recorder.start();
+    //     },
+    //     stopRecording() {
+    //         this.start = false
+    //         this.stop = true
+
+    //         this.recorder.stop()
+    //         this.stream.getVideTracks()[0].stop()
+    //         console.log('stop recording');
+            
+    //     }
+    // }
 }
 </script>
