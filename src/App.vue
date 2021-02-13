@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { onMounted, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import Video from './components/Video.vue'
 export default {
     name: 'App',
@@ -41,9 +41,13 @@ export default {
     setup() {
         const start = ref(false)
         const stop = ref(true)
-        const stream = ref(null)
-        const recorder = ref(null)
+        // const stream = ref({})
+        // const recorder = ref({})
         const videoSrc = ref(null)
+        const data = reactive({
+            stream: {},
+            recorder: {}
+        })
 
         // onMounted(() => {
         //     // if (!navigator.getDisplayMedia && !navigator.mediaDevices.getDisplayMedia) {
@@ -74,39 +78,62 @@ export default {
         //     }
         // })
 
+        onMounted(() => {
+            Notification.requestPermission().then(result => console.log(result))
+        })
+
         const startRecording = async () => {
             start.value = true
             stop.value = false
             // console.log('starting recording');
-            stream.value = await navigator.mediaDevices.getDisplayMedia({
-                video: { mediaSource: 'screen'}
-            })
-            recorder.value = new MediaRecorder(stream)
-            console.log(recorder);
-
-            const chunks = []
-            recorder.ondataavailable = (event) => chunks.push(event.data)
-            recorder.onstop = e => {
-                const completeBlob = new Blob(chunks, { type: chunks[0].type });
-                // console.log(completeBlob);
-                videoSrc.value = URL.createObjectURL(completeBlob);
-            };
-            recorder.start();
+            try {
+                // stream.value = await navigator.mediaDevices.getDisplayMedia({
+                //     video: { mediaSource: 'screen'}
+                // })
+                // stream.value = await navigator.mediaDevices.getDisplayMedia({
+                data.stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { cursor: "always" },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    }
+                })
+                // recorder.value = new MediaRecorder(stream, { mimeType: "video/webm; codecs=vp9" })
+                data.recorder = new MediaRecorder(data.stream, { mimeType: "video/webm; codecs=vp9" })
+                // console.log(recorder);
+    
+                const chunks = []
+                data.recorder.ondataavailable = (event) => chunks.push(event.data)
+                data.recorder.onstop = e => {
+                    // const completeBlob = new Blob(chunks, { type: chunks[0].type });
+                    const completeBlob = new Blob(chunks, { type: "video/webm" });
+                    // console.log(completeBlob);
+                    videoSrc.value = URL.createObjectURL(completeBlob);
+                };
+                data.recorder.start();                
+            } catch (error) {
+                start.value = false
+                stop.value = true
+                alert(error)
+            }
         }
 
         const stopRecording = () => {
             start.value = false
             stop.value = true
 
-            recorder.stop()
-            stream.getVideTracks()[0].stop()
-            console.log(stream);
+            data.recorder.stop()
+            data.stream.getVideTracks()[0].stop()
+            // console.log(data.stream);
             console.log('stop recording');
             
         }
 
         return {
-            start, stop, stream, recorder, videoSrc,
+            start, stop, videoSrc,
+            // stream, recorder,
+            data,
             startRecording, stopRecording
         }
     },
