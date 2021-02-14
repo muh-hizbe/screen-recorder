@@ -79,10 +79,11 @@ export default {
         // })
 
         onMounted(() => {
-            if (!navigator.mediaDevices && !navigator.mediaDevices.getUserMedia) {
+            if (navigator.mediaDevices && 'getDisplayMedia' in navigator.mediaDevices) {
+                console.log('Browser mendukung untuk perekaman layar');
+            }else {
                 alert('Browser tidak mendukung untuk melakukan perekaman layar')
             }
-            Notification.requestPermission().then(result => console.log(result))
         })
 
         const startRecording = async () => {
@@ -96,7 +97,8 @@ export default {
                 // stream.value = await navigator.mediaDevices.getDisplayMedia({
                 
                 data.stream = await navigator.mediaDevices.getDisplayMedia({
-                    video: { cursor: "always" },
+                    // video: { cursor: "always" },
+                    video: true,
                     audio: {
                         echoCancellation: true,
                         noiseSuppression: true,
