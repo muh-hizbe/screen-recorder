@@ -79,7 +79,7 @@ export default {
         // })
 
         onMounted(() => {
-            if (!navigator.mediaDevices && !navigator.mediaDevices.getUserMedia()) {
+            if (!navigator.mediaDevices && !navigator.mediaDevices.getUserMedia) {
                 alert('Browser tidak mendukung untuk melakukan perekaman layar')
             }
             Notification.requestPermission().then(result => console.log(result))
