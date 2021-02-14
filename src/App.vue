@@ -5,7 +5,7 @@
             <h1 class="text-3xl font-semibold text-center underline leading-loose"><span class="bg-white border-2 border-gray-700 p-3 rounded">🖥 Screen Media</span></h1>
             <p class="text-center font-semibold leading-loose">Screen recording</p>
             
-            <div class="block md:hidden text-center leading-loose mt-10 text-2xl px-5 underline">Tidak mendukung di browser mobile</div>
+            <!-- <div class="block md:hidden text-center leading-loose mt-10 text-2xl px-5 underline">Tidak mendukung di browser mobile</div> -->
             
             <div class="text-center mt-10" :class="stop ? 'grid grid-cols-2 gap-2 mx-96' : ''">
                 <button v-if="stop" @click="startRecording()" class="start transition duration-300 ease-in-out font-semibold border-2 border-blue-500 px-3 py-2 rounded hover:bg-blue-500 hover:text-white">⏺ Start Recording</button>
@@ -55,7 +55,7 @@ export default {
         //     //     console.log(msg);
         //     //     throw new Error(msg)
         //     // }
-        //     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        //     if (Navigator.mediaDevices && Navigator.mediaDevices.getUserMedia) {
         //         console.log('getUserMedia supported.');
         //         navigator.mediaDevices.getUserMedia (
         //             // constraints - only audio needed for this app
@@ -79,6 +79,9 @@ export default {
         // })
 
         onMounted(() => {
+            if (!navigator.mediaDevices && !navigator.mediaDevices.getUserMedia()) {
+                alert('Browser tidak mendukung untuk melakukan perekaman layar')
+            }
             Notification.requestPermission().then(result => console.log(result))
         })
 
@@ -91,6 +94,7 @@ export default {
                 //     video: { mediaSource: 'screen'}
                 // })
                 // stream.value = await navigator.mediaDevices.getDisplayMedia({
+                
                 data.stream = await navigator.mediaDevices.getDisplayMedia({
                     video: { cursor: "always" },
                     audio: {
