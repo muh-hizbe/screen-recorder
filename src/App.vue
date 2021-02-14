@@ -7,7 +7,7 @@
             
             <!-- <div class="block md:hidden text-center leading-loose mt-10 text-2xl px-5 underline">Tidak mendukung di browser mobile</div> -->
             
-            <div class="text-center mt-10" :class="stop ? 'grid grid-cols-2 gap-2 mx-96' : ''">
+            <div class="text-center mt-10" :class="stop ? 'grid grid-cols-1 lg:grid-cols-2 gap-2 mx-10 lg:mx-96' : ''">
                 <button v-if="stop" @click="startRecording()" class="start transition duration-300 ease-in-out font-semibold border-2 border-blue-500 px-3 py-2 rounded hover:bg-blue-500 hover:text-white">⏺ Start Recording</button>
                 <button v-if="start" @click="stopRecording()" class="stop transition duration-300 ease-in-out font-semibold border-2 border-red-500 px-3 py-2 rounded hover:bg-red-500 hover:text-white">⏹ Stop Recording</button>
                 <button v-if="stop" @click="() => { videoSrc = null }" class="stop transition duration-300 ease-in-out font-semibold border-2 border-red-500 px-3 py-2 rounded hover:bg-red-500 hover:text-white">🔴 Reset</button>
