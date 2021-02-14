@@ -84,6 +84,7 @@ export default {
             }else {
                 alert('Browser tidak mendukung untuk melakukan perekaman layar')
             }
+            // console.log(navigator.mediaDevices.getDisplayMedia());
         })
 
         const startRecording = async () => {
@@ -99,11 +100,11 @@ export default {
                 data.stream = await navigator.mediaDevices.getDisplayMedia({
                     // video: { cursor: "always" },
                     video: true,
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        sampleRate: 44100
-                    }
+                    // audio: {
+                    //     echoCancellation: true,
+                    //     noiseSuppression: true,
+                    //     sampleRate: 44100
+                    // }
                 })
                 // recorder.value = new MediaRecorder(stream, { mimeType: "video/webm; codecs=vp9" })
                 data.recorder = new MediaRecorder(data.stream, { mimeType: "video/webm; codecs=vp9" })
